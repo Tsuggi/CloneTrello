@@ -4,8 +4,15 @@
             <div class="column" v-for="(column, $indexC) in store.board.columns" :key="$indexC"
                 @drop="moveTaskOrColumn($event, column.tasks, $indexC)" @dragover.prevent @dragenter.prevent
                 draggable="true" @dragstart.self="pickUpColumn($event, $indexC)">
+
                 <div class="flex flex-col mb-2 font-bold">
-                    <span class="text-xl">{{ column.name }}</span>
+                    <div class="flex justify-between">
+                        <span class="text-xl">{{ column.name }}</span>
+                        <button @click.stop="deleteColumn($indexC)">
+                            <Poubelle />
+                        </button>
+                    </div>
+
                     <div class="list-reset">
                         <div class="task" v-for="(task, $indexT ) in column.tasks" :key="$indexT"
                             @click="goToTask(task)" draggable="true" @dragstart="pickUpTask($event, $indexT, $indexC)"
@@ -16,7 +23,6 @@
                             </span>
                             <div v-if="task.description" class="w-full mt-1 text-sm font-thin">
                                 <p>{{ task.description }}</p>
-                                <p>{{ task.id }}</p>
                                 <div class="flex justify-end">
                                     <button @click.stop="deleteTask($indexT, column.tasks)"
                                         class="bg-emerald-500 hover:bg-emerald-800 text-white py-1 px-2 rounded-full">
@@ -30,8 +36,8 @@
                     </div>
                 </div>
             </div>
-            <input type="text" class="column block p-2 w-full bg-transparent" placeholder="+ Add list"
-                            @keyup.enter="createColumn($event)">
+            <input type="text" class="column block p-2 bg-transparent w-{350px]" placeholder="+ Add list"
+                @keyup.enter="createColumn($event)">
         </div>
 
         <div class="bg-modal" v-if="isTaskOpen" @click.self="closeModal">
@@ -105,9 +111,12 @@ const pickUpColumn = (e, fromColumnIndex) => {
     e.dataTransfer.setData('index-Column', fromColumnIndex)
     e.dataTransfer.setData('type', 'column')
 }
-const createColumn = (e)=>{
+const createColumn = (e) => {
     store.CREATE_COLUMN(e.target.value);
     e.target.value = ''
+}
+const deleteColumn = (indexColumn) => {
+    store.DELETE_COLUMN(indexColumn)
 }
 </script>
 
@@ -119,11 +128,11 @@ const createColumn = (e)=>{
 
 .column {
     @apply p-2 mr-4 text-left shadow rounded bg-slate-100;
-    min-width: 350px;
+    max-width: 350px;
 }
 
 .task {
-    @apply flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white no-underline;
+    @apply flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white no-underline cursor-pointer;
 }
 
 .bg-modal {
