@@ -41,17 +41,23 @@ export const useStore = defineStore({
     UPDATE_TASK(task, property, value) {
       task[property] = value;
     },
-    DELETE_TASK(task, index){
-      task.splice(index,1);
+    DELETE_TASK(task, index) {
+      task.splice(index, 1);
     },
-    MOVE_TASK (fromColumn, toColumn, taskIndex, toTaskIndex){
+    MOVE_TASK(fromColumn, toColumn, taskIndex, toTaskIndex) {
       const taskToMove = fromColumn.splice(taskIndex, 1)[0];
       toColumn.splice(toTaskIndex, 0, taskToMove);
     },
-    MOVE_COLUMN (fromColumnIndex, toColumnIndex)
-    {
+    MOVE_COLUMN(fromColumnIndex, toColumnIndex) {
       const columnToMove = this.board.columns.splice(fromColumnIndex, 1)[0];
-      this.board.columns.splice(toColumnIndex, 0, columnToMove)
-    }
-  }
+      this.board.columns.splice(toColumnIndex, 0, columnToMove);
+    },
+    CREATE_COLUMN(columnName) {
+      this.board.columns.push({
+        name: columnName,
+        tasks: [],
+      });
+      console.log(this.board.columns);
+    },
+  },
 });

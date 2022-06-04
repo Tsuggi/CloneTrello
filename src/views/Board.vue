@@ -30,6 +30,8 @@
                     </div>
                 </div>
             </div>
+            <input type="text" class="column block p-2 w-full bg-transparent" placeholder="+ Add list"
+                            @keyup.enter="createColumn($event)">
         </div>
 
         <div class="bg-modal" v-if="isTaskOpen" @click.self="closeModal">
@@ -102,6 +104,10 @@ const pickUpColumn = (e, fromColumnIndex) => {
     e.dataTransfer.dropEffect = 'move'
     e.dataTransfer.setData('index-Column', fromColumnIndex)
     e.dataTransfer.setData('type', 'column')
+}
+const createColumn = (e)=>{
+    store.CREATE_COLUMN(e.target.value);
+    e.target.value = ''
 }
 </script>
 
