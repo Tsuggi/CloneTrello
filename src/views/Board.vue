@@ -2,12 +2,15 @@
     <div class="board">
         <div class="flex flex-row items-start">
             <div class="column" v-for="(column, $indexC) in store.board.columns" :key="$indexC"
-                @drop="moveTask($event, column.tasks)" @dragover.prevent @dragenter.prevent>
+                @drop="moveTaskOrColumn($event, column.tasks, $indexC)" @dragover.prevent @dragenter.prevent
+                draggable="true" @dragstart.self="pickUpColumn($event, $indexC)">
                 <div class="flex flex-col mb-2 font-bold">
                     <span class="text-xl">{{ column.name }}</span>
                     <div class="list-reset">
                         <div class="task" v-for="(task, $indexT ) in column.tasks" :key="$indexT"
-                            @click="goToTask(task)" draggable="true" @dragstart="pickUpTask($event, $indexT, $indexC)">
+                            @click="goToTask(task)" draggable="true" @dragstart="pickUpTask($event, $indexT, $indexC)"
+                            @dragover.prevent @dragenter.prevent
+                            @drop.stop="moveTaskOrColumn($event, column.tasks, $indexC, $indexT)">
                             <span class="w-full flex-no-shrink font-bold">
                                 {{ task.name }}
                             </span>
@@ -32,7 +35,6 @@
         <div class="bg-modal" v-if="isTaskOpen" @click.self="closeModal">
             <router-view />
         </div>
-
     </div>
 </template>
 
@@ -70,16 +72,38 @@ const pickUpTask = (e, indexTask, indexColumn) => {
     e.dataTransfer.dropEffect = 'move'
     e.dataTransfer.setData('index-Task', indexTask)
     e.dataTransfer.setData('index-Column', indexColumn)
+    e.dataTransfer.setData('type', 'task')
 }
-const moveTask = (e, toTasks) => {
+const moveTaskOrColumn = (e, toTasks, toColumnindex, toTaskIndex) => {
+    const type = e.dataTransfer.getData('type')
+    if (type === 'task') {
+        moveTask(e, toTasks, toTaskIndex !== undefined ? toTaskIndex : toTasks.length)
+    }
+    else {
+        moveColumn(e, toColumnindex)
+    }
+
+}
+
+const moveTask = (e, toTasks, toTaskIndex) => {
     const fromColumnIndex = e.dataTransfer.getData('index-Column')
     const taskIndex = e.dataTransfer.getData('index-Task')
     const fromTasks = store.board.columns[fromColumnIndex].tasks
-    
-    store.MOVE_TASK(fromTasks, toTasks, taskIndex)
+
+    store.MOVE_TASK(fromTasks, toTasks, taskIndex, toTaskIndex)
+}
+const moveColumn = (e, toColumnindex) => {
+    const fromColumnIndex = e.dataTransfer.getData('index-Column')
+    store.MOVE_COLUMN(fromColumnIndex, toColumnindex)
+}
+
+const pickUpColumn = (e, fromColumnIndex) => {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.dropEffect = 'move'
+    e.dataTransfer.setData('index-Column', fromColumnIndex)
+    e.dataTransfer.setData('type', 'column')
 }
 </script>
-
 
 
 <style scoped>
